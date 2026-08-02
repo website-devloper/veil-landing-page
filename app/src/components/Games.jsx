@@ -2,6 +2,7 @@ import Rise from "./Rise";
 import SplitHeading from "./SplitHeading";
 import useSpotlight from "./useSpotlight";
 import Art from "./Art";
+import asset from "../lib/asset";
 import { VR_GAMES, AUDIO_GAMES } from "../data/content";
 
 /*
@@ -33,7 +34,7 @@ export function Games() {
               <a className="game-poster" href="#preorder" aria-label={g.title}>
                 <Art
                   className="game-art"
-                  src={`/assets/images/games/${g.slug}.jpg`}
+                  src={asset(`assets/images/games/${g.slug}.jpg`)}
                   alt=""
                 />
                 <span className="game-sheen" />
@@ -75,7 +76,7 @@ export function AudioGames() {
               <span className="audio-no">{String(i + 1).padStart(2, "0")}</span>
               <Art
                 className="audio-art"
-                src={`/assets/images/games/${g.slug}.jpg`}
+                src={asset(`assets/images/games/${g.slug}.jpg`)}
                 alt=""
               />
               <div className="audio-copy">

@@ -1,4 +1,5 @@
 import { BRAND } from "../data/content";
+import asset from "../lib/asset";
 
 /*
   Horizontal lockup: the trimmed mark + a live wordmark.
@@ -17,7 +18,7 @@ export default function Logo({ href = "#top", className = "" }) {
     <a href={href} className={`brand-lockup ${className}`} aria-label={BRAND.name}>
       <img
         className="brand-mark"
-        src="/assets/images/logo-lockup.png"
+        src={asset("assets/images/logo-lockup.png")}
         alt=""
         width={340}
         height={402}

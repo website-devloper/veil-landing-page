@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { BRAND } from "../data/content";
+import asset from "../lib/asset";
 
 /*
   Loading reveal.
@@ -68,7 +69,7 @@ export default function Intro({ progress = 0 }) {
           >
             <img
               className="intro-logo"
-              src="/assets/images/logo-lockup.png"
+              src={asset("assets/images/logo-lockup.png")}
               alt={BRAND.name}
               width={340}
               height={402}

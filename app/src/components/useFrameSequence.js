@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react";
+import asset from "../lib/asset";
 
 const TOTAL = 420;
-const PATH = "/assets/images/frames/seq/frame_";
+const PATH = asset("assets/images/frames/seq/frame_");
 
 /* Cover-fit anchor. The headset lives in the upper half of every frame, so
    overflow is cropped off the bottom only. */
