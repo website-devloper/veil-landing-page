@@ -41,8 +41,12 @@ jobs:
         run: npm audit --omit=dev --audit-level=high
         continue-on-error: true
 
+      # Pages serves this repo at /veil-landing-page/ — without a matching base
+      # every asset resolves from the domain root and 404s.
       - name: Build
         working-directory: app
+        env:
+          VITE_BASE: /veil-landing-page/
         run: npm run build
 
       - uses: actions/configure-pages@v5
