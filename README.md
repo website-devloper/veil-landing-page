@@ -49,15 +49,21 @@ disables `publicDir` for builds and copies `../assets` itself, filtering out the
 
 ## Deploying
 
-Pushing to `main` runs `.github/workflows/deploy.yml`, which builds and publishes
-to GitHub Pages. Enable it once at **Settings → Pages → Source → GitHub Actions**.
+Hosted on Vercel. Import the repo at [vercel.com/new](https://vercel.com/new)
+and accept the defaults — `vercel.json` already declares the build:
 
-If the site is served from `https://<user>.github.io/<repo>/` rather than a
-custom domain, the base path must match:
+| setting | value |
+|---|---|
+| install | `cd app && npm ci` |
+| build | `cd app && npm run build` |
+| output | `app/dist` |
 
-```yaml
-- run: VITE_BASE=/<repo>/ npm run build
-```
+It serves from the domain root, so no base path is needed. Every push to `main`
+redeploys, and pull requests get their own preview URL.
+
+`vercel.json` also sets real security headers, which a purely static host
+cannot: CSP, HSTS, `nosniff`, frame-deny, and a one-year immutable cache on
+`/assets/images/*` — which matters here, since the hero alone is 420 files.
 
 ---
 
