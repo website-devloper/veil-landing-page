@@ -1,0 +1,12 @@
+{
+  "name": "lugx-gaming-site",
+  "private": true,
+  "version": "1.0.0",
+  "description": "LUGX headset landing page. The React app lives in app/ — these scripts just forward to it so npm run dev works from the project root too.",
+  "scripts": {
+    "dev": "npm --prefix app run dev",
+    "build": "npm --prefix app run build",
+    "preview": "npm --prefix app run preview",
+    "setup": "npm --prefix app install"
+  }
+}

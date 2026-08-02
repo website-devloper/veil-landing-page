@@ -1,0 +1,52 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# build output
+dist/
+build/
+.vite/
+
+# secrets — never commit these
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets.json
+credentials.json
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+
+# ---------------------------------------------------------------------------
+# Heavy source media. These are the *originals* the deployed assets were built
+# from — 68MB of video and the full-resolution PNG stills. The site does not
+# load them; keeping them out holds the repo near 25MB instead of 150MB.
+# Keep your own backup: once ignored, they are not in the repo's history.
+# ---------------------------------------------------------------------------
+assets/videos/
+assets/images/frames/*.png
+assets/images/games/_source/
+
+# retired static build, kept locally for reference only
+_legacy/
+app/public/assets
+
+# FontAwesome shipped with the retired template; nothing loads it now
+assets/webfonts/

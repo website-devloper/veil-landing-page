@@ -1,0 +1,1134 @@
+/*
+  VEIL — landing page layer.
+  Centred header, content bands, game cards, and the scroll motion system.
+  Loaded after story.css so these rules win wherever selectors overlap.
+  Inherits the tokens defined in story.css (:root).
+*/
+
+/* ============================================================ header */
+
+.site-head {
+  max-width: 1560px;
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 var(--shell);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 24px;
+}
+
+.head-links { display: flex; align-items: center; gap: 32px; }
+.head-links-left { grid-column: 1; justify-self: start; }
+.head-links-right { grid-column: 3; justify-self: end; }
+
+.head-links a {
+  position: relative;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  text-shadow: 0 1px 14px rgba(5, 6, 11, 0.95), 0 1px 3px rgba(5, 6, 11, 0.75);
+  transition: color 0.35s var(--ease);
+}
+.head-links a::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -6px;
+  height: 1px;
+  background: var(--blue);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.45s var(--ease);
+}
+.head-links a:hover { color: var(--ink); }
+.head-links a:hover::after { transform: scaleX(1); }
+
+/* outline only — no fill, so the footage reads straight through it */
+.head-cta {
+  padding: 11px 24px;
+  border: 1px solid var(--hair);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink) !important;
+  transition: border-color 0.4s var(--ease), box-shadow 0.5s var(--ease),
+              background 0.4s var(--ease);
+}
+.head-cta::after { display: none !important; }
+.head-cta:hover {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 1px var(--blue-glow), 0 8px 30px rgba(61, 139, 255, 0.16);
+}
+
+
+
+/* ambient light that breathes behind each band — the only looping motion */
+.band-glow {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.band-glow::before {
+  content: "";
+  position: absolute;
+  top: -25%;
+  left: 50%;
+  width: 68vw;
+  height: 68vw;
+  background: radial-gradient(circle, rgba(61, 139, 255, 0.1), transparent 62%);
+  animation: glow-drift 22s ease-in-out infinite alternate;
+}
+
+@keyframes glow-drift {
+  0%   { transform: translate(-62%, -4%) scale(1); opacity: 0.75; }
+  100% { transform: translate(-38%, 6%) scale(1.18); opacity: 1; }
+}
+
+/* ============================================================ bands */
+
+.band {
+  position: relative;
+  padding: clamp(96px, 14vh, 190px) var(--shell);
+  background: var(--bg);
+  border-top: 1px solid var(--hair-soft);
+  overflow: hidden;
+}
+
+.band-inner { position: relative; z-index: 1; max-width: 1560px; margin: 0 auto; }
+.band-head { max-width: 720px; margin: 0 0 clamp(48px, 7vh, 88px); }
+
+.band-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--blue);
+  margin-bottom: 22px;
+}
+.band-eyebrow::before {
+  content: "";
+  width: 34px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--blue), transparent);
+  flex: none;
+}
+
+.band-title {
+  font-size: clamp(30px, 3.6vw, 56px);
+  font-weight: 200;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  margin: 0 0 22px;
+}
+.band-title em { font-style: normal; font-weight: 300; color: var(--blue); }
+
+.band-lede {
+  font-size: clamp(14px, 1.05vw, 16px);
+  line-height: 1.85;
+  color: var(--ink-dim);
+  max-width: 56ch;
+  margin: 0;
+}
+
+/* ============================================================ VR game cards */
+
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: clamp(26px, 2.6vw, 46px);
+}
+
+.game { position: relative; }
+
+.game-poster {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 9;   /* matches the 900x506 key art */
+  border-radius: 14px;
+  overflow: hidden;
+  isolation: isolate;
+  background: #080a11;
+  border: 1px solid var(--hair-soft);
+  transition: transform 0.8s var(--ease), border-color 0.5s var(--ease),
+              box-shadow 0.8s var(--ease);
+}
+
+/* If aspect-ratio is unavailable the poster would collapse to zero height and
+   the art would vanish with no error. Hold the 16:9 box with padding instead. */
+@supports not (aspect-ratio: 16 / 9) {
+  .game-poster { height: 0; padding-bottom: 56.25%; }
+  .audio-art { height: auto; }
+}
+
+/* Real <img>, not a CSS background: it loads lazily, carries its own intrinsic
+   900x506 ratio, and cannot be silently killed by an unsupported property.
+   The gradient behind it only shows if a file is ever missing. */
+.game-art {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: linear-gradient(155deg, #16203a, #070a12);
+  transform: scale(1.01);
+  transition: transform 1.2s var(--ease), filter 0.7s var(--ease);
+}
+
+/* light touch — the key art already carries the game's own title, so this
+   only seats the chips and stops the card glowing out of the page */
+.game-poster::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(5, 6, 11, 0.05) 38%, rgba(5, 6, 11, 0.62) 100%);
+  pointer-events: none;
+}
+
+/* single specular pass that crosses the card on hover */
+.game-sheen {
+  position: absolute;
+  top: -30%;
+  bottom: -30%;
+  left: -70%;
+  width: 55%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.14), transparent);
+  transform: skewX(-14deg) translateX(0);
+  transition: transform 1.1s var(--ease);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.game-poster:hover {
+  transform: translateY(-7px);
+  border-color: rgba(61, 139, 255, 0.55);
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--blue-glow);
+}
+.game-poster:hover .game-art { transform: scale(1.075); filter: saturate(1.08); }
+.game-poster:hover .game-sheen { transform: skewX(-14deg) translateX(360%); }
+
+.game-no {
+  position: absolute;
+  z-index: 3;
+  top: 16px;
+  left: 18px;
+  font-family: "Sora", sans-serif;
+  font-size: 10px;
+  font-weight: 300;
+  letter-spacing: 0.24em;
+  color: rgba(255, 255, 255, 0.62);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.8);
+}
+
+.game-genre {
+  position: absolute;
+  z-index: 3;
+  bottom: 16px;
+  left: 18px;
+  padding: 8px 15px;
+  border: 1px solid var(--hair);
+  border-radius: 999px;
+  background: rgba(5, 6, 11, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.game-go {
+  position: absolute;
+  z-index: 3;
+  right: 16px;
+  bottom: 16px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--hair);
+  background: rgba(5, 6, 11, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--ink);
+  opacity: 0;
+  transform: translate(6px, 6px);
+  transition: opacity 0.5s var(--ease), transform 0.6s var(--ease),
+              background 0.4s var(--ease);
+}
+.game-go i { font-style: normal; font-size: 13px; line-height: 1; }
+.game-poster:hover .game-go {
+  opacity: 1;
+  transform: translate(0, 0);
+  background: var(--blue);
+  border-color: transparent;
+}
+
+.game-body { padding-top: 20px; }
+
+.game h3 {
+  font-size: 19px;
+  font-weight: 300;
+  letter-spacing: -0.018em;
+  margin: 0 0 10px;
+  transition: color 0.4s var(--ease);
+}
+.game:hover h3 { color: var(--blue); }
+
+.game p {
+  font-size: 13.5px;
+  line-height: 1.8;
+  color: var(--ink-dim);
+  margin: 0;
+  max-width: 42ch;
+}
+
+.game-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+}
+
+/* ============================================================ audio list */
+
+.audio-list { list-style: none; margin: 0; padding: 0; }
+
+.audio-row {
+  display: grid;
+  grid-template-columns: 46px 138px 1fr auto;
+  align-items: center;
+  gap: clamp(18px, 2.4vw, 40px);
+  padding: 26px 0;
+  border-top: 1px solid var(--hair-soft);
+}
+.audio-row:last-child { border-bottom: 1px solid var(--hair-soft); }
+
+.audio-no {
+  font-family: "Sora", sans-serif;
+  font-size: 11px;
+  font-weight: 300;
+  letter-spacing: 0.2em;
+  color: var(--ink-faint);
+  transition: color 0.4s var(--ease);
+}
+
+.audio-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--hair-soft);
+  background: linear-gradient(150deg, #16203a, #070a12);
+  transition: transform 0.8s var(--ease), border-color 0.5s var(--ease),
+              box-shadow 0.7s var(--ease);
+}
+
+.audio-copy h3 {
+  font-size: 18px;
+  font-weight: 300;
+  letter-spacing: -0.018em;
+  margin: 0 0 9px;
+  transition: color 0.4s var(--ease);
+}
+.audio-copy p {
+  font-size: 13.5px;
+  line-height: 1.8;
+  color: var(--ink-dim);
+  margin: 0;
+  max-width: 62ch;
+}
+
+.audio-cue {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--blue);
+  opacity: 0.75;
+}
+
+.audio-tag {
+  padding: 9px 18px;
+  border: 1px solid var(--hair-soft);
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  white-space: nowrap;
+  transition: border-color 0.45s var(--ease), color 0.45s var(--ease);
+}
+
+/* hover moves the parts, never the row itself — the row carries the
+   scroll transform and the two would fight */
+.audio-row:hover .audio-art {
+  transform: scale(1.045);
+  border-color: rgba(61, 139, 255, 0.5);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.45);
+}
+.audio-row:hover .audio-copy h3 { color: var(--blue); }
+.audio-row:hover .audio-no { color: var(--ink-dim); }
+.audio-row:hover .audio-tag { border-color: var(--blue); color: var(--ink); }
+
+/* ============================================================ specs + steps */
+
+/* A fixed 4-column lattice. auto-fit was giving six columns on a wide screen
+   and stranding two orphans on a second row; eight cells over four always
+   resolves to two clean rows. Values are short enough never to wrap — the
+   qualifier is demoted to a note. */
+.spec-lattice {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  margin: 0 0 clamp(60px, 9vh, 110px);
+  background: var(--hair-soft);
+  border: 1px solid var(--hair-soft);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.spec-cell {
+  position: relative;
+  padding: clamp(24px, 2.2vw, 34px);
+  background: #070910;
+  transition: background 0.55s var(--ease);
+}
+.spec-cell:hover { background: #0b0e18; }
+
+.spec-label {
+  display: block;
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 18px;
+}
+
+.spec-value {
+  display: block;
+  font-family: "Sora", sans-serif;
+  font-size: clamp(24px, 2.3vw, 34px);
+  font-weight: 200;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  white-space: nowrap;
+  margin-bottom: 12px;
+}
+
+.spec-note {
+  display: block;
+  font-size: 11px;
+  font-weight: 300;
+  line-height: 1.55;
+  color: var(--ink-faint);
+}
+
+@media (max-width: 1100px) {
+  .spec-lattice { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 520px) {
+  .spec-lattice { grid-template-columns: 1fr; }
+}
+
+.step-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: clamp(28px, 3vw, 56px);
+}
+.step { position: relative; }
+.step span {
+  display: block;
+  font-family: "Sora", sans-serif;
+  font-size: 11px;
+  font-weight: 300;
+  letter-spacing: 0.24em;
+  color: var(--blue);
+  margin-bottom: 16px;
+}
+.step h3 {
+  font-size: 20px;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  margin: 0 0 12px;
+}
+.step p {
+  font-size: 13.5px;
+  line-height: 1.8;
+  color: var(--ink-dim);
+  margin: 0;
+}
+
+/* ============================================================ pre-order */
+
+.preorder {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(96px, 15vh, 200px) var(--shell);
+  border-top: 1px solid var(--hair-soft);
+  background:
+    radial-gradient(70% 120% at 50% 100%, rgba(61, 139, 255, 0.15), transparent 62%),
+    var(--bg);
+  text-align: center;
+}
+
+.preorder-inner { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; }
+.preorder .band-eyebrow { justify-content: center; }
+.preorder .band-eyebrow::after {
+  content: "";
+  width: 34px;
+  height: 1px;
+  background: linear-gradient(270deg, var(--blue), transparent);
+  flex: none;
+}
+
+.preorder h2 {
+  font-size: clamp(32px, 4.6vw, 68px);
+  font-weight: 200;
+  line-height: 1.04;
+  letter-spacing: -0.032em;
+  margin: 0 0 22px;
+}
+
+.preorder-inner > p {
+  font-size: 15px;
+  line-height: 1.85;
+  color: var(--ink-dim);
+  max-width: 46ch;
+  margin: 0 auto 40px;
+}
+
+.preorder-price { margin-bottom: 34px; }
+.preorder-price b {
+  display: block;
+  font-family: "Sora", sans-serif;
+  font-size: clamp(34px, 3.6vw, 48px);
+  font-weight: 200;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  margin-bottom: 12px;
+}
+.preorder-price small {
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.preorder-form {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 460px;
+  margin: 0 auto 18px;
+  border: 1px solid var(--hair);
+  border-radius: 999px;
+  padding: 5px 5px 5px 24px;
+  background: rgba(255, 255, 255, 0.035);
+  transition: border-color 0.4s var(--ease), box-shadow 0.5s var(--ease);
+}
+.preorder-form:focus-within {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 4px rgba(61, 139, 255, 0.1);
+}
+.preorder-form input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  color: var(--ink);
+  font-family: "Inter", sans-serif;
+  font-size: 12.5px;
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  padding: 13px 0;
+}
+.preorder-form input::placeholder { color: var(--ink-faint); }
+.preorder-form button {
+  flex: none;
+  border: 0;
+  border-radius: 999px;
+  padding: 14px 30px;
+  background: var(--ink);
+  color: #05060b;
+  font-family: "Inter", sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.4s var(--ease), color 0.4s var(--ease),
+              transform 0.4s var(--ease);
+}
+.preorder-form button:hover { background: var(--blue); color: #fff; }
+.preorder-form button:active { transform: scale(0.97); }
+
+.preorder-note {
+  font-size: 10px;
+  font-weight: 300;
+  letter-spacing: 0.14em;
+  color: var(--ink-faint);
+}
+
+/* ============================================================ faq */
+
+.faq-item { border-top: 1px solid var(--hair-soft); }
+.faq-item:last-child { border-bottom: 1px solid var(--hair-soft); }
+
+.faq-q {
+  position: relative;
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 26px 44px 26px 0;
+  font-family: "Sora", sans-serif;
+  font-size: clamp(15px, 1.3vw, 19px);
+  font-weight: 300;
+  letter-spacing: -0.018em;
+  color: var(--ink);
+  transition: color 0.35s var(--ease);
+}
+.faq-q::after {
+  content: "";
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  width: 11px;
+  height: 1px;
+  background: var(--ink-dim);
+}
+.faq-q i {
+  position: absolute;
+  right: 11px;
+  top: 50%;
+  width: 1px;
+  height: 11px;
+  margin-top: -5px;
+  background: var(--ink-dim);
+  transition: opacity 0.35s var(--ease), transform 0.45s var(--ease);
+}
+.faq-q:hover { color: var(--blue); }
+.faq-q.is-open { color: var(--blue); }
+.faq-q.is-open i { opacity: 0; transform: rotate(90deg); }
+
+/* height is animated by framer-motion; this only owns the inner spacing */
+.faq-a { overflow: hidden; }
+.faq-a p {
+  margin: 0;
+  padding: 0 8ch 30px 0;
+  font-size: 13.5px;
+  line-height: 1.85;
+  color: var(--ink-dim);
+}
+
+/* ============================================================ responsive */
+
+@media (max-width: 991px) {
+  .audio-row { grid-template-columns: 34px 112px 1fr; }
+  .audio-tag { display: none; }
+}
+
+@media (max-width: 767px) {
+  .head-links-left { display: none; }
+  .head-links-right { gap: 0; }
+  .head-links-right a:not(.head-cta) { display: none; }
+  .head-cta { padding: 10px 18px; font-size: 9px; }
+  .site-head .logo { font-size: 17px; letter-spacing: 0.26em; text-indent: 0.26em; }
+
+  .audio-row {
+    grid-template-columns: 30px 1fr;
+    gap: 14px 16px;
+    padding: 24px 0;
+  }
+  .audio-art { grid-column: 2; max-width: 200px; }
+  .audio-copy { grid-column: 2; }
+
+  .spec-cell { padding-right: clamp(20px, 2vw, 28px); }
+  .faq-a p { padding-right: 0; }
+  .footer-inner { flex-direction: column; align-items: flex-start; gap: 20px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .band-glow::before { animation: none; }
+  .game-poster:hover { transform: none; }
+  .game-poster:hover .game-art { transform: scale(1.01); }
+  .game-sheen { display: none; }
+}
+
+/* ============================================================ polish pass */
+
+/* Anchors were landing underneath the fixed header — every jump link was
+   arriving with its heading already scrolled off the top. */
+section[id], footer[id] { scroll-margin-top: 112px; }
+
+/* Keyboard focus. There was none anywhere on the page: tabbing through gave no
+   indication of position at all. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+.game-poster:focus-visible { outline-offset: 5px; }
+.head-cta:focus-visible,
+.scene-cta:focus-visible,
+.scene-tag:focus-visible { outline-offset: 4px; }
+
+/* Key art fades up once decoded rather than snapping in mid-scroll. */
+.game-art,
+.audio-art {
+  opacity: 0;
+  transition: opacity 0.75s var(--ease), transform 1.2s var(--ease),
+              border-color 0.5s var(--ease), box-shadow 0.7s var(--ease);
+}
+.game-art.is-loaded,
+.audio-art.is-loaded { opacity: 1; }
+
+/* ---- footer ---- */
+
+.footer-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 40px;
+  padding-bottom: 40px;
+}
+
+.footer-brand { max-width: 34ch; }
+
+.footer-line {
+  margin: 14px 0 0;
+  font-size: 12.5px;
+  font-weight: 300;
+  line-height: 1.7;
+  color: var(--ink-faint);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.footer-nav {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  gap: 14px 44px;
+}
+.footer-nav a {
+  position: relative;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  transition: color 0.35s var(--ease);
+}
+.footer-nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -5px;
+  height: 1px;
+  background: var(--blue);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.45s var(--ease);
+}
+.footer-nav a:hover { color: var(--ink); }
+.footer-nav a:hover::after { transform: scaleX(1); }
+
+.footer-base {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: space-between;
+  padding-top: 26px;
+  border-top: 1px solid var(--hair-soft);
+}
+.footer-base p {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 300;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+@media (max-width: 767px) {
+  .footer-inner { flex-direction: column; gap: 30px; }
+  .footer-nav { grid-template-columns: repeat(2, 1fr); gap: 16px 20px; width: 100%; }
+  .footer-base { flex-direction: column; gap: 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-art, .audio-art { opacity: 1; transition: none; }
+}
+
+/* ============================================================ brand lockup */
+
+.brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+.site-head .brand-lockup { grid-column: 2; justify-self: center; }
+
+.brand-mark {
+  height: 30px;
+  width: auto;
+  display: block;
+  flex: none;
+  transition: transform 0.6s var(--ease), filter 0.5s var(--ease);
+}
+.brand-lockup:hover .brand-mark {
+  transform: scale(1.06);
+  filter: drop-shadow(0 0 14px var(--blue-glow));
+}
+
+
+/* the bar tightens on scroll — the mark tracks it */
+.header-area.is-tight .brand-mark { height: 26px; }
+.header-area.is-tight
+.brand-lockup.is-footer .brand-mark { height: 26px; }
+
+@media (max-width: 767px) {
+  .brand-mark { height: 24px; }
+}
+
+/* ============================================================ design fixes */
+
+/* The pill is absolutely positioned and belongs on the artwork, so the poster
+   has to be its containing block. It now lives inside .game-poster (which is
+   already position:relative); previously it resolved against .game and landed
+   on top of the description. */
+.game-poster .game-genre { bottom: 14px; left: 16px; }
+
+/* Cards in a row carry different amounts of copy. Making the column a flex
+   box and pushing the meta line down keeps every card's footer on one baseline
+   instead of floating at the end of a ragged paragraph. */
+.game { display: flex; flex-direction: column; height: 100%; }
+.game-body { display: flex; flex-direction: column; flex: 1; padding-top: 20px; }
+.game-body p { margin: 0; }
+
+/* The stylesheet expected <ul><li> here but the markup renders a single span,
+   so none of the small-caps treatment was landing — it was rendering at body
+   size. Style the span itself. */
+span.game-meta {
+  display: block;
+  margin-top: auto;
+  padding-top: 16px;
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* ---- pre-order band ---- */
+
+/* These rules were written against `.preorder`, but the section's class is
+   `band-preorder` — so none of them matched and the block was left-aligned
+   while its form and note centred themselves. */
+.band-preorder .preorder-inner { text-align: center; }
+.band-preorder .band-eyebrow { justify-content: center; }
+.band-preorder .band-eyebrow::after {
+  content: "";
+  width: 34px;
+  height: 1px;
+  background: linear-gradient(270deg, var(--blue), transparent);
+  flex: none;
+}
+.band-preorder .band-title { margin-bottom: 30px; }
+
+/* markup renders a <span>, not a <small> */
+.preorder-price span {
+  display: block;
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.band-preorder .preorder-form { justify-content: center; }
+
+/* ---- brand ---- */
+
+/* logo.png is a square canvas that is ~64% empty margin, so it needs a tall
+   box before the artwork reads at normal logo scale. */
+.brand-mark {
+  height: 76px;
+  width: auto;
+  display: block;
+  flex: none;
+  transition: height 0.5s var(--ease), transform 0.6s var(--ease),
+              filter 0.5s var(--ease);
+}
+.header-area.is-tight .brand-mark { height: 64px; }
+.brand-lockup.is-footer .brand-mark { height: 70px; }
+
+@media (max-width: 767px) {
+  .brand-mark { height: 56px; }
+  .header-area.is-tight .brand-mark { height: 50px; }
+}
+
+/* ---- contact ---- */
+
+.footer-phone {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 22px;
+}
+.footer-phone span {
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.footer-phone b {
+  font-family: "Sora", sans-serif;
+  font-size: 19px;
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  transition: color 0.35s var(--ease);
+}
+.footer-phone:hover b { color: var(--blue); }
+
+.preorder-note a {
+  color: var(--ink-dim);
+  border-bottom: 1px solid var(--hair);
+  transition: color 0.35s var(--ease), border-color 0.35s var(--ease);
+}
+.preorder-note a:hover { color: var(--blue); border-color: var(--blue); }
+
+/* ============================================================ marquee */
+
+.marquee {
+  position: relative;
+  overflow: hidden;
+  padding: 26px 0;
+  border-top: 1px solid var(--hair-soft);
+  border-bottom: 1px solid var(--hair-soft);
+  background: var(--bg);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
+}
+.marquee.is-accent {
+  background:
+    linear-gradient(90deg, rgba(61, 139, 255, 0.07), transparent 40%, rgba(61, 139, 255, 0.07)),
+    var(--bg);
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 46s linear infinite;
+}
+.marquee:hover .marquee-track { animation-play-state: paused; }
+
+/* the track holds two identical rows; -50% lands copy two exactly where copy
+   one began, so the seam is invisible */
+@keyframes marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+
+.marquee-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.marquee-row li {
+  display: flex;
+  align-items: center;
+  gap: 34px;
+  padding-right: 34px;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  white-space: nowrap;
+}
+.marquee-row li i {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--blue);
+  box-shadow: 0 0 8px var(--blue-glow);
+  flex: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none; }
+}
+
+/* ============================================================ split headings */
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* The mask is the effect: each word slides up out of a hidden box, so the type
+   rises out of the page instead of fading onto it. */
+.split-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  /* descenders (g, y, p) would be clipped by a tight box */
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+.split-word { display: inline-block; will-change: transform; }
+.split-word em { font-style: normal; font-weight: 300; color: var(--blue); }
+
+/* ============================================================ card spotlight */
+
+/* Only on devices with a real pointer — there is no cursor to follow on touch,
+   and the extra layer would just cost paint. */
+@media (hover: hover) and (pointer: fine) {
+  .game-poster::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.45s var(--ease);
+    background: radial-gradient(
+      380px circle at var(--mx, 50%) var(--my, 50%),
+      rgba(61, 139, 255, 0.22),
+      rgba(61, 139, 255, 0.07) 42%,
+      transparent 68%
+    );
+  }
+  .game-poster.is-lit::before { opacity: 1; }
+  .game-poster.is-lit { border-color: rgba(61, 139, 255, 0.45); }
+}
+
+/* ============================================================ performance */
+
+/* Skip layout and paint for bands still far off-screen. contain-intrinsic-size
+   keeps the scrollbar honest so the page height does not jump as they render. */
+.band {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
+}
+/* never defer the hero or anything pinned — it must paint immediately */
+.story, .header-area { content-visibility: visible; }
+
+/* Long-lived compositing hints are a cost, not a win. The scrubber and the
+   marquee earn theirs; nothing else should hold a layer permanently. */
+.reveal { will-change: auto; }
+
+/* ============================================================ intro reveal */
+
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* two halves that part vertically — the product doing what its name says */
+.intro-half {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 50.2%;   /* slight overlap so no hairline seam shows at the join */
+  background: var(--bg);
+}
+.intro-top { top: 0; }
+.intro-bottom { bottom: 0; }
+
+.intro-center {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 26px;
+}
+
+.intro-logo {
+  height: clamp(96px, 13vh, 150px);
+  width: auto;
+  display: block;
+}
+
+.intro-bar {
+  width: clamp(160px, 22vw, 260px);
+  height: 1px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+.intro-bar i {
+  display: block;
+  height: 100%;
+  width: 100%;
+  transform-origin: left;
+  background: linear-gradient(90deg, var(--blue-deep), var(--blue));
+  box-shadow: 0 0 12px var(--blue-glow);
+}
+
+.intro-pct {
+  font-family: "Sora", sans-serif;
+  font-size: 10px;
+  font-weight: 300;
+  letter-spacing: 0.34em;
+  text-indent: 0.34em;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+/* the counter must not reflow its neighbours as digits change width */
+.spec-value { font-variant-numeric: tabular-nums; }
+
+.footer-disclaimer {
+  max-width: 52ch;
+  text-align: right;
+  line-height: 1.7;
+  text-transform: none !important;
+  letter-spacing: 0.04em !important;
+}
+@media (max-width: 767px) {
+  .footer-disclaimer { text-align: left; }
+}
